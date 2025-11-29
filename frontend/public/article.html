@@ -203,9 +203,28 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
-    <script src="js/config.js"></script>
     <script>
-    const API_BASE = window.CONFIG ? window.CONFIG.API_BASE : '/api';
+    const API_BASE = '/api';
+
+    // Helper function to get correct image URL
+    function getImageUrl(imagePath) {
+        if (!imagePath) {
+            return 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80';
+        }
+        
+        // If it's already a full URL, return as is
+        if (imagePath.startsWith('http')) {
+            return imagePath;
+        }
+        
+        // For relative paths, use the current origin
+        if (imagePath.startsWith('/uploads')) {
+            return imagePath; // This will be relative to current domain
+        }
+        
+        // If it's just a filename, prepend uploads path
+        return `/uploads/images/${imagePath}`;
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -245,7 +264,7 @@
         
         const articleHTML = `
             <div class="article-hero">
-                <img src="${article.image ? article.image.startsWith('http') ? article.image : '/uploads' + article.image : 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80'}" 
+                <img src="${getImageUrl(article.image)}" 
                      alt="${article.title}" 
                      class="article-image-hero">
                 
@@ -276,7 +295,7 @@
                 </div>
                 
                 <div class="article-content-hero">
-                    ${article.content.split('\n').map(p => p ? `<p>${p}</p>` : '').join('')}
+                    ${article.content ? article.content.split('\n').map(p => p ? `<p>${p}</p>` : '').join('') : '<p>No content available.</p>'}
                 </div>
             </div>
             

@@ -238,18 +238,37 @@ async function searchArticles(query) {
     }
 }
 
+// Helper function to get correct image URL
+function getImageUrl(imagePath) {
+    if (!imagePath) {
+        return 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
+    }
+    
+    // If it's already a full URL, return as is
+    if (imagePath.startsWith('http')) {
+        return imagePath;
+    }
+    
+    // For relative paths, use the current origin
+    if (imagePath.startsWith('/uploads')) {
+        return imagePath; // This will be relative to current domain
+    }
+    
+    // If it's just a filename, prepend uploads path
+    return `/uploads/images/${imagePath}`;
+}
+
 // Render featured articles - FIXED IMAGE PATHS
 function renderFeaturedArticles(articles) {
     const featuredHTML = articles.map(article => `
         <div class="featured-article" onclick="viewArticle('${article._id}')">
-           <img src="${article.image ? article.image.startsWith('http') ? article.image : '/uploads' + article.image : 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'}" 
- 
+           <img src="${getImageUrl(article.image)}" 
                  alt="${article.title}" 
                  class="featured-article-image">
             <div class="featured-article-content">
                 <span class="featured-badge">Featured</span>
                 <h3 class="featured-article-title">${article.title}</h3>
-                <p class="featured-article-excerpt">${article.excerpt || article.content.substring(0, 120) + '...'}</p>
+                <p class="featured-article-excerpt">${article.excerpt || (article.content ? article.content.substring(0, 120) + '...' : 'No content available')}</p>
                 <div class="featured-article-meta">
                     <span><i class="far fa-calendar"></i> ${formatDate(article.createdAt)}</span>
                     <span><i class="far fa-eye"></i> ${article.views || 0} views</span>
@@ -265,13 +284,13 @@ function renderFeaturedArticles(articles) {
 function renderArticles(articles) {
     const articlesHTML = articles.map(article => `
         <div class="article-card" onclick="viewArticle('${article._id}')">
-            <img src="${article.image ? 'http://localhost:5000' + article.image : 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'}" 
+            <img src="${getImageUrl(article.image)}" 
                  alt="${article.title}" 
                  class="article-image">
             <div class="article-content">
                 <span class="article-category">${article.category}</span>
                 <h3 class="article-title">${article.title}</h3>
-                <p class="article-excerpt">${article.excerpt || article.content.substring(0, 100) + '...'}</p>
+                <p class="article-excerpt">${article.excerpt || (article.content ? article.content.substring(0, 100) + '...' : 'No content available')}</p>
                 <div class="article-meta">
                     <span><i class="far fa-calendar"></i> ${formatDate(article.createdAt)}</span>
                     <span><i class="far fa-eye"></i> ${article.views || 0} views</span>

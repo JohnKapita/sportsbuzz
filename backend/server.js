@@ -16,27 +16,17 @@ app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false
 }));
+
+// CORS configuration - FIXED
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (mobile apps, curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:3000', 
-      'http://localhost:5000', 
-      'http://127.0.0.1:3000',
-      'https://sportsbuzz-pnpa.onrender.com',  // ADDED: Your Render domain
-      'https://yourdomain.com'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('localhost')) {
-      return callback(null, true);
-    }
-    
-    return callback(new Error('Not allowed by CORS'));
-  },
+  origin: [
+    'https://sportsbuzz-pnpa.onrender.com',
+    'http://localhost:3000', 
+    'http://localhost:5000'
+  ],
   credentials: true
 }));
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
