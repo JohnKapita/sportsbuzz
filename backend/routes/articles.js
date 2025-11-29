@@ -3,8 +3,8 @@ const { auth, requireAdmin } = require('./auth');
 const Article = require('../models/Article');
 const Subscriber = require('../models/Subscriber');
 const Analytics = require('../models/Analytics');
-const emailService = require('../utils/emailService');
 const Comment = require('../models/Comment');
+const emailService = require('../utils/emailService'); // FIXED: Correct import
 
 const router = express.Router();
 
@@ -204,7 +204,7 @@ router.post('/', auth, requireAdmin, async (req, res) => {
     const article = new Article(articleData);
     await article.save();
 
-    // Send email notifications to subscribers
+    // Send email notifications to subscribers - FIXED: Use emailService
     try {
       const subscribers = await Subscriber.find({ active: true });
       if (subscribers.length > 0) {

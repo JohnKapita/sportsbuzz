@@ -1,6 +1,7 @@
 const express = require('express');
 const Subscriber = require('../models/Subscriber');
 const { auth, requireAdmin } = require('./auth');
+const emailService = require('../utils/emailService'); // FIXED: Correct import
 
 const router = express.Router();
 
@@ -53,12 +54,12 @@ router.post('/', async (req, res) => {
 
     await subscriber.save();
 
-    // Send welcome email
+    // Send welcome email - FIXED: Use emailService
     try {
-      const emailService = require('../utils/emailService');
       await emailService.sendWelcomeEmail(email);
     } catch (emailError) {
       console.error('Welcome email failed:', emailError);
+      // Don't fail subscription if email fails
     }
 
     res.status(201).json({
