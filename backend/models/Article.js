@@ -5,7 +5,7 @@ const articleSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Article title is required'],
     trim: true,
-    maxlength: [200, 'Title cannot exceed 200 characters']
+    maxlength: [1000, 'Title cannot exceed 1000 characters']
   },
   content: {
     type: String,
