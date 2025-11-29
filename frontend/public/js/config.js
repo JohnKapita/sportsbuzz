@@ -8,7 +8,7 @@ const getApiBase = () => {
 };
 
 const CONFIG = {
-    API_BASE: getApiBase()
+    API_BASE: 'https://sportsbuzz-pnpa.onrender.com/api'
 };
 
 // Enhanced error handling

@@ -1,7 +1,7 @@
 // FULLY WORKING ADMIN.JS WITH DEBUG FIXES
 console.log('🚀 ADMIN.JS LOADED - Data loading ENABLED', new Date().toLocaleTimeString());
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://sportsbuzz-pnpa.onrender.com/api';
 let authToken = localStorage.getItem('adminToken');
 let currentUser = null;
 let currentCharts = {};
