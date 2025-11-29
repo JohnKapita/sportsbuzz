@@ -8,6 +8,9 @@ require('dotenv').config();
 
 const app = express();
 
+// Fix for rate limit warning
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: false,
@@ -22,7 +25,8 @@ app.use(cors({
       'http://localhost:3000', 
       'http://localhost:5000', 
       'http://127.0.0.1:3000',
-      'https://yourdomain.com'  // Add your production domain
+      'https://sportsbuzz-pnpa.onrender.com',  // ADDED: Your Render domain
+      'https://yourdomain.com'
     ];
     
     if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('localhost')) {
