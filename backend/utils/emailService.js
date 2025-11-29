@@ -2,13 +2,21 @@ const nodemailer = require('nodemailer');
 
 class EmailService {
   constructor() {
+    // Use SendGrid SMTP - works reliably on Render
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: process.env.SMTP_PORT || 587,
+      host: 'smtp.sendgrid.net',
+      port: 587,
       secure: false,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
+        user: 'apikey', // Literally the word 'apikey'
+        pass: process.env.SENDGRID_API_KEY // Your SendGrid API key
+      },
+      // Optimized timeouts for Render
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 10000,
+      tls: {
+        rejectUnauthorized: false
       }
     });
   }
@@ -91,9 +99,9 @@ class EmailService {
     }
   }
 
-  // Email templates
+  // Email templates (keep your existing templates - they're great!)
   generateArticleEmailTemplate(article) {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://sportsbuzz-pnpa.onrender.com';
     const articleUrl = `${frontendUrl}/article.html?id=${article._id}`;
     const imageUrl = article.image ? `${frontendUrl}${article.image}` : 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
     
@@ -148,7 +156,7 @@ class EmailService {
   }
 
   generateCommentEmailTemplate(comment, article) {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://sportsbuzz-pnpa.onrender.com';
     
     return `
       <!DOCTYPE html>
@@ -245,7 +253,7 @@ class EmailService {
   }
 
   generateWelcomeEmailTemplate() {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://sportsbuzz-pnpa.onrender.com';
     
     return `
       <!DOCTYPE html>
@@ -302,16 +310,16 @@ class EmailService {
   // Core email sending function
   async sendEmail(to, subject, html) {
     try {
-      // Check if email configuration is set
-      if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        console.warn('⚠️ Email configuration missing. Emails will not be sent.');
+      // Check if SendGrid API key is set
+      if (!process.env.SENDGRID_API_KEY) {
+        console.warn('⚠️ SendGrid API key missing. Emails will not be sent.');
         console.log('📧 Would have sent email to:', to);
         console.log('📧 Subject:', subject);
         return false;
       }
 
       const mailOptions = {
-        from: `"Sport Buzz" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+        from: `"Sport Buzz" <${process.env.EMAIL_FROM || 'sportsbuzzs9@gmail.com'}>`,
         to,
         subject,
         html
@@ -330,10 +338,10 @@ class EmailService {
   async testEmailConfig() {
     try {
       await this.transporter.verify();
-      console.log('✅ Email server is ready to send messages');
+      console.log('✅ SendGrid email server is ready to send messages');
       return true;
     } catch (error) {
-      console.error('❌ Email server configuration error:', error);
+      console.error('❌ SendGrid email configuration error:', error);
       return false;
     }
   }
