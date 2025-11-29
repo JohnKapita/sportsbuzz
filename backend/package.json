@@ -2,11 +2,11 @@
   "name": "sportbuzz",
   "version": "1.0.0",
   "description": "Sport Buzz - Sports News Website",
-  "main": "backend/server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js",
-    "client": "cd frontend/public && python3 -m http.server 3000",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "client": "cd ../frontend/public && python3 -m http.server 3000",
     "dev:full": "concurrently \"npm run dev\" \"npm run client\"",
     "build": "echo 'No build process needed for this setup'",
     "test": "echo 'No tests specified'"
