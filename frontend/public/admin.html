@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Sport Buzz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Additional Admin Styles */
+        .admin-dashboard {
+            min-height: 100vh;
+            background: #f5f5f5;
+        }
+
+        .admin-header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-nav .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .admin-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            border: none;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #0085C7;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Dashboard Styles */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-left: 4px solid #0085C7;
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #0085C7;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #202124;
+        }
+
+        .stat-label {
+            color: #5f6368;
+            font-size: 1rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-container h4 {
+            margin-bottom: 20px;
+            color: #202124;
+        }
+
+        .top-articles {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-articles h4 {
+            margin-bottom: 20px;
+            color: #202124;
+        }
+
+        .top-article-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .top-article-item:hover {
+            background: #f8f9fa;
+        }
+
+        .article-rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0085C7;
+            margin-right: 15px;
+            min-width: 30px;
+        }
+
+        .article-info {
+            flex: 1;
+        }
+
+        .article-info h5 {
+            margin: 0 0 5px 0;
+            color: #202124;
+        }
+
+        .article-meta {
+            display: flex;
+            gap: 15px;
+            color: #5f6368;
+            font-size: 0.9rem;
+        }
+
+        /* Forms */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .image-preview {
+            display: none;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .image-preview img {
+            max-width: 300px;
+            max-height: 200px;
+            border-radius: 8px;
+        }
+
+        .image-actions {
+            margin-top: 10px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-form">
+            <div class="logo">
+                <i class="fas fa-newspaper fa-3x"></i>
+                <h2>Sport Buzz</h2>
+                <p>Admin Panel</p>
+            </div>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <div id="loginMessage" class="message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="admin-dashboard" id="adminDashboard" style="display: none;">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="container">
+                <div class="admin-nav">
+                    <div class="logo">
+                        <i class="fas fa-newspaper"></i>
+                        <span>Sport Buzz Admin</span>
+                    </div>
+                    <div class="admin-actions">
+                        <span id="adminWelcome">Welcome, Admin</span>
+                        <button class="btn btn-outline" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="container">
+                <div class="admin-tabs">
+                    <button class="tab-btn active" data-tab="dashboard">
+                        <i class="fas fa-chart-bar"></i> Dashboard
+                    </button>
+                    <button class="tab-btn" data-tab="articles">
+                        <i class="fas fa-newspaper"></i> Articles
+                    </button>
+                    <button class="tab-btn" data-tab="add-article">
+                        <i class="fas fa-plus"></i> Add Article
+                    </button>
+                    <button class="tab-btn" data-tab="comments">
+                        <i class="fas fa-comments"></i> Comments
+                    </button>
+                    <button class="tab-btn" data-tab="subscribers">
+                        <i class="fas fa-users"></i> Subscribers
+                    </button>
+                    <button class="tab-btn" data-tab="contacts">
+                        <i class="fas fa-envelope"></i> Contacts
+                    </button>
+                </div>
+
+                <!-- Dashboard Tab -->
+                <div class="tab-content active" id="dashboard-tab">
+                    <div class="dashboard-header">
+                        <h3>Analytics Dashboard</h3>
+                        <div class="date-filter">
+                            <select id="analyticsPeriod">
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month" selected>This Month</option>
+                                <option value="year">This Year</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading statistics...</p>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h4>Views Over Time</h4>
+                            <canvas id="viewsChart" width="400" height="200"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Top Categories</h4>
+                            <canvas id="categoriesChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Top Articles -->
+                    <div class="top-articles">
+                        <h4>Top Performing Articles</h4>
+                        <div id="topArticlesList">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading top articles...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Articles Management Tab -->
+                <div class="tab-content" id="articles-tab">
+                    <div class="tab-header">
+                        <h3>Manage Articles</h3>
+                        <div class="tab-actions">
+                            <div class="search-box">
+                                <input type="text" id="articleSearch" placeholder="Search articles...">
+                                <button class="btn btn-primary" id="searchArticlesBtn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="articles-list" id="articlesList">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading articles...</p>
+                        </div>
+                    </div>
+                    <div class="pagination" id="articlesPagination">
+                        <!-- Pagination will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Add Article Tab -->
+                <div class="tab-content" id="add-article-tab">
+                    <h3>Add New Article</h3>
+                    <form id="addArticleForm" enctype="multipart/form-data">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="articleTitle">Article Title *</label>
+                                <input type="text" id="articleTitle" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="articleCategory">Category *</label>
+                                <select id="articleCategory" required>
+                                    <option value="">Select Category</option>
+                                    <option value="football">Football</option>
+                                    <option value="cricket">Cricket</option>
+                                    <option value="rugby">Rugby</option>
+                                    <option value="athletics">Athletics</option>
+                                    <option value="basketball">Basketball</option>
+                                    <option value="tennis">Tennis</option>
+                                    <option value="women">Women in Sport</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="articleImage">Article Image</label>
+                            <input type="file" id="articleImage" accept="image/*">
+                            <div class="image-preview" id="imagePreview">
+                                <img id="previewImage" src="" alt="Image preview">
+                                <div class="image-actions">
+                                    <button type="button" id="removeImage" class="btn btn-secondary">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="articleContent">Content *</label>
+                            <textarea id="articleContent" rows="12" required></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="featuredArticle">
+                                    <span class="checkmark"></span>
+                                    Feature this article
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="publishArticle" checked>
+                                    <span class="checkmark"></span>
+                                    Publish immediately
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="publishButton">
+                                <i class="fas fa-paper-plane"></i> Publish Article
+                            </button>
+                            <button type="button" class="btn btn-outline" id="draftButton">
+                                <i class="fas fa-save"></i> Save as Draft
+                            </button>
+                        </div>
+                        <div id="articleMessage" class="message"></div>
+                    </form>
+                </div>
+
+                <!-- Comments Tab -->
+                <div class="tab-content" id="comments-tab">
+                    <h3>Manage Comments</h3>
+                    <div class="comments-filters">
+                        <button class="filter-btn active" data-filter="all">All Comments</button>
+                        <button class="filter-btn" data-filter="pending">Pending Approval</button>
+                        <button class="filter-btn" data-filter="approved">Approved</button>
+                    </div>
+                    <div class="comments-list" id="commentsList">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading comments...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subscribers Tab -->
+                <div class="tab-content" id="subscribers-tab">
+                    <div class="tab-header">
+                        <h3>Newsletter Subscribers</h3>
+                        <div class="subscriber-stats" id="subscriberStats">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading subscriber stats...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="subscribers-list" id="subscribersList">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading subscribers...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contacts Tab -->
+                <div class="tab-content" id="contacts-tab">
+                    <div class="tab-header">
+                        <h3>Contact Messages</h3>
+                        <div class="contact-stats" id="contactStats">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading contact stats...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contacts-list" id="contactsList">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading contacts...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="js/admin.js"></script>
+
+    <!-- Debug Script -->
+<script>
+console.log('=== DEBUG: Checking HTML Elements ===');
+console.log('📍 Current URL:', window.location.href);
+console.log('📄 Document readyState:', document.readyState);
+
+// Check all dashboard elements
+const elements = {
+    statsGrid: document.getElementById('statsGrid'),
+    viewsChart: document.getElementById('viewsChart'),
+    categoriesChart: document.getElementById('categoriesChart'),
+    topArticlesList: document.getElementById('topArticlesList'),
+    dashboardTab: document.getElementById('dashboard-tab')
+};
+
+console.log('🔍 Element Status:', elements);
+
+// Check if we're in the dashboard tab
+console.log('📑 Active tab:', document.querySelector('.tab-content.active')?.id);
+
+// Force check when DOM is fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 DOM Fully Loaded - Final Check:');
+    Object.keys(elements).forEach(key => {
+        const element = document.getElementById(key === 'topArticlesList' ? 'topArticlesList' : key);
+        console.log(`🏁 ${key}:`, element ? '✅ FOUND' : '❌ NOT FOUND');
+    });
+});
+
+// Emergency element creator
+function createMissingElements() {
+    console.log('🚨 Creating missing elements...');
+    const dashboardTab = document.getElementById('dashboard-tab');
+    if (!dashboardTab) {
+        console.error('❌ dashboard-tab not found!');
+        return;
+    }
+
+    const requiredElements = [
+        { id: 'statsGrid', html: '<div id="statsGrid" class="stats-grid"></div>' },
+        { id: 'viewsChart', html: '<canvas id="viewsChart" width="400" height="200"></canvas>' },
+        { id: 'categoriesChart', html: '<canvas id="categoriesChart" width="400" height="200"></canvas>' },
+        { id: 'topArticlesList', html: '<div id="topArticlesList"></div>' }
+    ];
+
+    requiredElements.forEach(({ id, html }) => {
+        if (!document.getElementById(id)) {
+            console.log(`⚠️ Creating missing element: ${id}`);
+            dashboardTab.insertAdjacentHTML('beforeend', html);
+        }
+    });
+}
+
+// Run emergency creator
+setTimeout(createMissingElements, 1000);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
