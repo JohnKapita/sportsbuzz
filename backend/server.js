@@ -4,7 +4,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const app = express();
@@ -49,38 +48,9 @@ console.log('📁 Directory Info:', {
   backendDir: __dirname
 });
 
-// ========== EMAIL CONFIGURATION ========== //
-// Use SendGrid SMTP instead of Gmail SMTP
-const transporter = nodemailer.createTransport({
-  host: 'smtp.sendgrid.net',
-  port: 587,
-  secure: false,
-  auth: {
-    user: 'apikey', // Literally the word 'apikey'
-    pass: process.env.SENDGRID_API_KEY // Your SendGrid API key from environment variables
-  },
-  // Add timeout settings for Render
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 10000,
-  tls: {
-    rejectUnauthorized: false
-  }
-});
-
-// Verify email configuration on startup
-transporter.verify(function(error, success) {
-  if (error) {
-    console.log('❌ SendGrid email configuration error:', error);
-  } else {
-    console.log('✅ SendGrid email server is ready to send messages');
-    console.log(`📧 SendGrid configured for: ${process.env.EMAIL_FROM}`);
-  }
-});
-
-// Make transporter available to routes
-app.set('transporter', transporter);
-// ========== END EMAIL CONFIGURATION ========== //
+// Initialize email service on startup
+const emailService = require('./utils/emailService');
+console.log('📧 Email service initialized with SendGrid API');
 
 // Static files - FIXED: Serve from correct frontend/public directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -196,7 +166,8 @@ mongoose.connection.once('open', async () => {
     console.log(`🔧 API: http://localhost:${PORT}/api`);
     console.log(`⚙️  Admin: http://localhost:${PORT}/admin`);
     console.log(`📄 Articles: http://localhost:${PORT}/article.html`);
-    console.log(`📧 SendGrid configured: ${process.env.EMAIL_FROM}`);
+    console.log(`📧 SendGrid API: ${process.env.SENDGRID_API_KEY ? '✅ Configured' : '❌ Missing'}`);
+    console.log(`📧 From email: ${process.env.EMAIL_FROM}`);
     console.log('\n🔑 Default Admin Login:');
     console.log('   Username: admin');
     console.log('   Password: admin123');

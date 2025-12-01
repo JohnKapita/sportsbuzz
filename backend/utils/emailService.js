@@ -1,24 +1,14 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
 class EmailService {
   constructor() {
-    // Use SendGrid SMTP - works reliably on Render
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp.sendgrid.net',
-      port: 587,
-      secure: false,
-      auth: {
-        user: 'apikey', // Literally the word 'apikey'
-        pass: process.env.SENDGRID_API_KEY // Your SendGrid API key
-      },
-      // Optimized timeouts for Render
-      connectionTimeout: 15000,
-      greetingTimeout: 15000,
-      socketTimeout: 10000,
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
+    // Set SendGrid API key directly
+    if (process.env.SENDGRID_API_KEY) {
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      console.log('✅ SendGrid API configured');
+    } else {
+      console.warn('⚠️ SENDGRID_API_KEY not found in environment variables');
+    }
   }
 
   // Send new article notification to all subscribers
@@ -31,13 +21,21 @@ class EmailService {
       
       // Send to all subscribers
       for (const subscriber of subscribers) {
-        await this.sendEmail(subscriber.email, subject, html);
+        await this.sendEmail({
+          to: subscriber.email,
+          from: process.env.EMAIL_FROM || 'sportsbuzzs9@gmail.com',
+          subject,
+          html
+        });
       }
       
       console.log(`✅ Sent new article notification to ${subscribers.length} subscribers`);
       return true;
     } catch (error) {
       console.error('❌ Failed to send article notifications:', error);
+      if (error.response) {
+        console.error('SendGrid error details:', error.response.body);
+      }
       return false;
     }
   }
@@ -54,7 +52,12 @@ class EmailService {
         return false;
       }
       
-      await this.sendEmail(adminEmail, subject, html);
+      await this.sendEmail({
+        to: adminEmail,
+        from: process.env.EMAIL_FROM || 'sportsbuzzs9@gmail.com',
+        subject,
+        html
+      });
       console.log('✅ Sent new comment notification to admin');
       return true;
     } catch (error) {
@@ -75,7 +78,12 @@ class EmailService {
         return false;
       }
       
-      await this.sendEmail(adminEmail, subject, html);
+      await this.sendEmail({
+        to: adminEmail,
+        from: process.env.EMAIL_FROM || 'sportsbuzzs9@gmail.com',
+        subject,
+        html
+      });
       console.log('✅ Sent contact form notification to admin');
       return true;
     } catch (error) {
@@ -90,7 +98,12 @@ class EmailService {
       const subject = '🎉 Welcome to Sport Buzz Newsletter!';
       const html = this.generateWelcomeEmailTemplate();
       
-      await this.sendEmail(email, subject, html);
+      await this.sendEmail({
+        to: email,
+        from: process.env.EMAIL_FROM || 'sportsbuzzs9@gmail.com',
+        subject,
+        html
+      });
       console.log(`✅ Sent welcome email to ${email}`);
       return true;
     } catch (error) {
@@ -307,41 +320,30 @@ class EmailService {
     `;
   }
 
-  // Core email sending function
-  async sendEmail(to, subject, html) {
+  // Core email sending function using SendGrid API
+  async sendEmail(emailData) {
     try {
       // Check if SendGrid API key is set
       if (!process.env.SENDGRID_API_KEY) {
         console.warn('⚠️ SendGrid API key missing. Emails will not be sent.');
-        console.log('📧 Would have sent email to:', to);
-        console.log('📧 Subject:', subject);
+        console.log('📧 Would have sent email to:', emailData.to);
+        console.log('📧 Subject:', emailData.subject);
         return false;
       }
 
-      const mailOptions = {
-        from: `"Sport Buzz" <${process.env.EMAIL_FROM || 'sportsbuzzs9@gmail.com'}>`,
-        to,
-        subject,
-        html
-      };
+      // Ensure from address is set
+      if (!emailData.from) {
+        emailData.from = process.env.EMAIL_FROM || 'sportsbuzzs9@gmail.com';
+      }
 
-      const result = await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Email sent to: ${to}`);
+      const result = await sgMail.send(emailData);
+      console.log(`✅ Email sent to: ${emailData.to}`);
       return true;
     } catch (error) {
       console.error('❌ Email sending failed:', error);
-      return false;
-    }
-  }
-
-  // Test email configuration
-  async testEmailConfig() {
-    try {
-      await this.transporter.verify();
-      console.log('✅ SendGrid email server is ready to send messages');
-      return true;
-    } catch (error) {
-      console.error('❌ SendGrid email configuration error:', error);
+      if (error.response) {
+        console.error('SendGrid API error details:', error.response.body);
+      }
       return false;
     }
   }
