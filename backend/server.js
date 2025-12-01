@@ -4,7 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const nodemailer = require('nodemailer'); // ADD THIS LINE
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const app = express();
@@ -50,20 +50,19 @@ console.log('📁 Directory Info:', {
 });
 
 // ========== EMAIL CONFIGURATION ========== //
-// ADD THIS SECTION - Configure nodemailer with your SMTP variables
+// Use SendGrid SMTP instead of Gmail SMTP
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: process.env.SMTP_PORT || 587,
+  host: 'smtp.sendgrid.net',
+  port: 587,
   secure: false,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: 'apikey', // Literally the word 'apikey'
+    pass: process.env.SENDGRID_API_KEY // Your SendGrid API key from environment variables
   },
-  from: process.env.SMTP_FROM,
   // Add timeout settings for Render
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 60000,
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 10000,
   tls: {
     rejectUnauthorized: false
   }
@@ -72,9 +71,10 @@ const transporter = nodemailer.createTransport({
 // Verify email configuration on startup
 transporter.verify(function(error, success) {
   if (error) {
-    console.log('❌ Email configuration error:', error);
+    console.log('❌ SendGrid email configuration error:', error);
   } else {
-    console.log('✅ Email server is ready to send messages');
+    console.log('✅ SendGrid email server is ready to send messages');
+    console.log(`📧 SendGrid configured for: ${process.env.EMAIL_FROM}`);
   }
 });
 
@@ -196,7 +196,7 @@ mongoose.connection.once('open', async () => {
     console.log(`🔧 API: http://localhost:${PORT}/api`);
     console.log(`⚙️  Admin: http://localhost:${PORT}/admin`);
     console.log(`📄 Articles: http://localhost:${PORT}/article.html`);
-    console.log(`📧 Email: ${process.env.SMTP_USER} (${process.env.SMTP_HOST}:${process.env.SMTP_PORT})`);
+    console.log(`📧 SendGrid configured: ${process.env.EMAIL_FROM}`);
     console.log('\n🔑 Default Admin Login:');
     console.log('   Username: admin');
     console.log('   Password: admin123');
