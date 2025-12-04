@@ -52,8 +52,19 @@ console.log('📁 Directory Info:', {
 const emailService = require('./utils/emailService');
 console.log('📧 Email service initialized with SendGrid API');
 
-// Static files - FIXED: Serve from correct frontend/public directory
+// ✅ FIX #1: Serve uploaded files FIRST
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ✅ FIX #2: API routes BEFORE static files
+app.use('/api/auth', require('./routes/auth').router);
+app.use('/api/articles', require('./routes/articles'));
+app.use('/api/comments', require('./routes/comments'));
+app.use('/api/subscribers', require('./routes/subscribers'));
+app.use('/api/contacts', require('./routes/contacts'));
+app.use('/api/upload', require('./routes/uploads')); // This route was getting blocked!
+app.use('/api/analytics', require('./routes/analytics'));
+
+// ✅ Now serve static files AFTER API routes
 app.use(express.static(frontendPublicDir));
 
 // Database connection with error handling
@@ -90,15 +101,6 @@ const initializeAdmin = async () => {
     console.error('❌ Admin initialization error:', error);
   }
 };
-
-// ✅ Routes - FIXED UPLOAD ROUTE
-app.use('/api/auth', require('./routes/auth').router);
-app.use('/api/articles', require('./routes/articles'));
-app.use('/api/comments', require('./routes/comments'));
-app.use('/api/subscribers', require('./routes/subscribers'));
-app.use('/api/contacts', require('./routes/contacts'));
-app.use('/api/upload', require('./routes/uploads')); // CHANGED: from /api/uploads to /api/upload
-app.use('/api/analytics', require('./routes/analytics'));
 
 // Serve frontend - FIXED: Correct paths to frontend/public
 app.get('/', (req, res) => {
