@@ -740,7 +740,7 @@ async function handleArticleSubmit(e) {
             const imageFormData = new FormData();
             imageFormData.append('image', imageFile);
 
-            const uploadResponse = await fetch(`${API_BASE}/uploads/image`, {
+            const uploadResponse = await fetch(`${API_BASE}/upload/image`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${authToken}`

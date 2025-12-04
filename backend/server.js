@@ -91,13 +91,13 @@ const initializeAdmin = async () => {
   }
 };
 
-// ✅ Routes
+// ✅ Routes - FIXED UPLOAD ROUTE
 app.use('/api/auth', require('./routes/auth').router);
 app.use('/api/articles', require('./routes/articles'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/subscribers', require('./routes/subscribers'));
 app.use('/api/contacts', require('./routes/contacts'));
-app.use('/api/uploads', require('./routes/uploads'));
+app.use('/api/upload', require('./routes/uploads')); // CHANGED: from /api/uploads to /api/upload
 app.use('/api/analytics', require('./routes/analytics'));
 
 // Serve frontend - FIXED: Correct paths to frontend/public
